@@ -120,7 +120,6 @@
           {"name": "name", "label": "Representative name", "type": "text", "required": true},
           {"name": "phone", "label": "WhatsApp mobile number", "type": "tel", "required": true, "pattern": "[0-9]{10}"},
           {"name": "email", "label": "Email address", "type": "email"},
-          {"name": "old_capacity_ah", "label": "Old tubular battery capacity (Ah)", "type": "number", "required": true, "min": 1},
           {"name": "old_voltage", "type": "hidden", "value": "12"},
           {"name": "manufacturing_year", "label": "Manufacturing year", "type": "number", "required": true, "min": 1990},
           {"name": "old_quantity", "label": "Old battery quantity", "type": "number", "required": true, "min": 1},

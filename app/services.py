@@ -81,10 +81,26 @@ def serpbase_predict(form,key):
   raise SearchUnavailable('Google search is temporarily unavailable.') from error
  except Exception as error:raise SearchUnavailable('Google search is temporarily unavailable.') from error
  if payload.get('status') not in (None,0):raise SearchUnavailable('Google search could not complete the request.')
+ return search_result(form,payload.get('organic',[]),domains,terms)
+def serpapi_predict(form,key):
+ domains=tuple(x.strip().lower() for x in os.getenv('BATTERY_SEARCH_ALLOWED_DOMAINS',','.join(DEFAULT_SEARCH_DOMAINS)).split(',') if x.strip())
+ terms=battery_search_terms(form)
+ if not terms:return {'prediction':None,'confidence':'low','needs_manual_review':True,'message':'No battery-fitment details were available to search.','sources':[],'records':[]}
+ query=('compatible battery model capacity Ah '+' '.join(terms)+' ('+' OR '.join('site:'+d for d in domains)+')')[:500]
+ params=urllib.parse.urlencode({'api_key':key,'engine':'google','google_domain':'google.co.in','gl':'in','hl':'en','q':query})
+ try:
+  with urllib.request.urlopen('https://serpapi.com/search.json?'+params,timeout=int(os.getenv('SERPAPI_TIMEOUT','20'))) as response:payload=json.loads(response.read())
+ except urllib.error.HTTPError as error:
+  if error.code in (401,403):raise SearchUnavailable('SerpAPI rejected the API key. Check SERPAPI_API_KEY.') from error
+  raise SearchUnavailable('Google search is temporarily unavailable.') from error
+ except Exception as error:raise SearchUnavailable('Google search is temporarily unavailable.') from error
+ if payload.get('error'):raise SearchUnavailable('Google search could not complete the request.')
+ return search_result(form,payload.get('organic_results',[]),domains,terms)
+def search_result(form,items,domains,terms):
  def allowed(link):
   host=(urllib.parse.urlsplit(link).hostname or '').lower()
   return any(host==domain or host.endswith('.'+domain) for domain in domains)
- items=[item for item in payload.get('organic',[]) if allowed(item.get('link') or item.get('url',''))]
+ items=[item for item in items if allowed(item.get('link') or item.get('url',''))]
  sources=[{'title':re.sub(r'\s+',' ',str(item.get('title',''))).strip()[:160],
            'url':item.get('link') or item.get('url'),'domain':urllib.parse.urlsplit(item.get('link') or item.get('url')).hostname}
           for item in items[:5]]
@@ -106,8 +122,14 @@ def serpbase_predict(form,key):
          'sources':sources,'records':[record],'shared_fields':[name for name in SEARCH_FIELDS if form.get(name)]}
 def predict(form):
  key=os.getenv('SERPBASE_API_KEY')
- if not key:raise SearchUnavailable('Google search is not configured. Add SERPBASE_API_KEY to .env and restart the server.')
- return serpbase_predict(form,key)
+ fallback_key=os.getenv('SERPAPI_API_KEY')
+ if key:
+  try:return serpbase_predict(form,key)
+  except SearchUnavailable:
+   if fallback_key:return serpapi_predict(form,fallback_key)
+   raise
+ if fallback_key:return serpapi_predict(form,fallback_key)
+ raise SearchUnavailable('Google search is not configured. Add SERPBASE_API_KEY or SERPAPI_API_KEY to .env and restart the server.')
 
 def _brand(text):
  upper=text.upper()

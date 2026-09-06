@@ -31,6 +31,7 @@ def test_dynamic_form_schema_and_conditional_validation(tmp_path):
  assert all(field['type'] == 'text' for field in schemas.json['new']['applications']['four_wheeler']['fields'] if field['name'] in {'vehicle_make','vehicle_model','brand'})
  tubular_fields={field['name']:field for field in schemas.json['restoration']['applications']['inverter_tubular']['fields']}
  assert tubular_fields['old_voltage']=={'name':'old_voltage','type':'hidden','value':'12'}
+ assert 'old_capacity_ah' not in tubular_fields
  assert 'registration_year' not in vehicle_fields
  assert 'vehicle_details' not in vehicle_fields and 'vehicle_type' not in vehicle_fields
  form={'solution_type':'new','application_key':'inverter','name':'A','phone':'9876543210',
@@ -73,6 +74,30 @@ def test_serpbase_google_search_uses_only_allowlisted_fitment_data(tmp_path,monk
  assert result['prediction']['model_no']=='XLTZ4A' and result['confidence']=='high'
  assert len(result['sources'])==2 and all('exidecare.com' in source['domain'] for source in result['sources'])
  assert set(result['shared_fields']) <= set(services.SEARCH_FIELDS)
+
+def test_search_falls_back_to_serpapi(monkeypatch):
+ from app import services
+ monkeypatch.setenv('SERPBASE_API_KEY','primary-key')
+ monkeypatch.setenv('SERPAPI_API_KEY','fallback-key')
+ monkeypatch.setenv('BATTERY_SEARCH_ALLOWED_DOMAINS','exidecare.com')
+ requested=[]
+ class SearchResponse:
+  def __init__(self,payload):self.payload=payload
+  def __enter__(self):return self
+  def __exit__(self,*args):pass
+  def read(self):return json.dumps(self.payload).encode()
+ def search(request,timeout):
+  requested.append(request.full_url if hasattr(request,'full_url') else request)
+  if len(requested)==1:return SearchResponse({'status':1503,'error':'service unavailable'})
+  return SearchResponse({'organic_results':[{
+   'title':'EXIDE XLTZ4A battery for Honda Shine',
+   'snippet':'Official XLTZ4A 4 Ah fitment information.',
+   'link':'https://www.exidecare.com/products/xltz4a'}]})
+ monkeypatch.setattr(services.urllib.request,'urlopen',search)
+ result=services.predict({'application':'Two Wheeler','vehicle_make':'Honda','vehicle_model':'Shine'})
+ assert requested[0]=='https://api.serpbase.dev/google/search'
+ assert requested[1].startswith('https://serpapi.com/search.json?')
+ assert result['prediction']['model_no']=='XLTZ4A'
 
 def test_catalog_publish_upserts_without_deleting_other_records(tmp_path, monkeypatch):
  from app import services
