@@ -1,12 +1,11 @@
-import re,json,os,smtplib,urllib.error,urllib.parse,urllib.request
+import re,json,os,smtplib,urllib.request
 from pathlib import Path
 from email.message import EmailMessage
 from datetime import datetime,timezone
 from . import db
 from .models import Delivery
 BASE=Path(__file__).resolve().parent
-DATA=BASE/'data/current_pricing.json'
-CATALOGS=BASE/'data/catalogs'
+CATALOGS=BASE/'data/brands'
 SCHEMAS=BASE/'data/form_schemas.json'
 def norm(v): return re.sub(r'[^a-z0-9]+',' ',str(v or '').lower()).strip()
 def num(v):
@@ -15,11 +14,13 @@ def num(v):
 def load_data():
  records=[]; sources=[]
  for path in sorted(CATALOGS.glob('*.json')) if CATALOGS.exists() else []:
-  payload=json.loads(path.read_text(encoding='utf-8'));records.extend(payload.get('records',[]));sources.append(path.name)
- if DATA.exists():
-  legacy=json.loads(DATA.read_text(encoding='utf-8'))
-  records.extend(legacy.get('records',[]));sources.append(DATA.name)
- return {'schema_version':'2.0','records':records,'catalogs':sources}
+  payload=json.loads(path.read_text(encoding='utf-8'));brand=payload['brand']
+  for product in payload.get('products',[]):
+   record={'source_type':'retail','brand':brand,**product}
+   if product.get('tentative_price') is not None:record['mrp']=product['tentative_price']
+   records.append(record)
+  sources.append(path.name)
+ return {'schema_version':'3.0','records':records,'catalogs':sources}
 VEHICLE_APPLICATIONS=(('three_wheeler','Three Wheeler'),('four_wheeler','Four Wheeler'),
  ('commercial_vehicle','Commercial Vehicle'),('bus','Bus'),('truck','Truck'),('tractor','Tractor'),
  ('earth_mover','Earth Mover'))
@@ -43,97 +44,89 @@ def validate_form(form):
 def fitment_application(value):
  key=norm(value).replace(' ','_')
  return {'bus':'commercial_vehicle','truck':'commercial_vehicle','car_suv_muv':'four_wheeler'}.get(key,key)
-class SearchUnavailable(RuntimeError): pass
-SEARCH_FIELDS=('application','application_key','vehicle_type','vehicle_make','vehicle_model','registration_year',
-               'generator_make','generator_model','generator_capacity_kw','generator_year','fuel_type',
-               'capacity_ah','voltage','new_battery_height','new_battery_width','new_battery_depth','model_no',
-               'old_capacity_ah','old_voltage','vehicle_details','generator_details','new_dimensions')
-DEFAULT_SEARCH_DOMAINS=('exidecare.com','amaron.com','livguard.com','luminousindia.com','sfsonicpower.com')
-def battery_search_terms(form):
- values=[]
- for name in SEARCH_FIELDS:
-  value=str(form.get(name,'')).strip()
-  if not value:continue
-  value=re.sub(r'\b[A-Z]{2}[- ]?\d{1,2}[- ]?[A-Z]{1,3}[- ]?\d{1,4}\b',' ',value,flags=re.I)
-  value=re.sub(r'[^A-Za-z0-9 ./+()\-]',' ',value)
-  value=re.sub(r'\s+',' ',value).strip()[:80]
-  if value:values.append(value)
- return values
-def fitment_label(form):
- values=(form.get('vehicle_make'),form.get('vehicle_model'),form.get('registration_year'),
-         form.get('generator_make'),form.get('generator_model'),form.get('generator_year'))
- return ' '.join(str(value).strip() for value in values if value) or form.get('vehicle_details') or form.get('generator_details')
-def serpbase_predict(form,key):
- domains=tuple(x.strip().lower() for x in os.getenv('BATTERY_SEARCH_ALLOWED_DOMAINS',','.join(DEFAULT_SEARCH_DOMAINS)).split(',') if x.strip())
- terms=battery_search_terms(form)
- if not terms:return {'prediction':None,'confidence':'low','needs_manual_review':True,'message':'No battery-fitment details were available to search.','sources':[],'records':[]}
- query=('compatible battery model capacity Ah '+' '.join(terms)+' ('+' OR '.join('site:'+d for d in domains)+')')[:500]
- body=json.dumps({'q':query,'hl':'en','gl':'in','device':'default'}).encode()
- endpoint=os.getenv('SERPBASE_BASE_URL','https://api.serpbase.dev').rstrip('/')+'/google/search'
- try:
-  req=urllib.request.Request(endpoint,data=body,headers={
-   'Content-Type':'application/json','Accept':'application/json','X-API-Key':key,
-   'User-Agent':'BatteryWala/1.0','X-SerpBase-Source':'batterywala'})
-  with urllib.request.urlopen(req,timeout=int(os.getenv('SERPBASE_TIMEOUT','20'))) as response:payload=json.loads(response.read())
- except urllib.error.HTTPError as error:
-  if error.code==401:raise SearchUnavailable('Serpbase rejected the API key. Check SERPBASE_API_KEY.') from error
-  if error.code==403:raise SearchUnavailable('Serpbase blocked the search request (HTTP 403). Check the key permissions or Serpbase account access.') from error
-  raise SearchUnavailable('Google search is temporarily unavailable.') from error
- except Exception as error:raise SearchUnavailable('Google search is temporarily unavailable.') from error
- if payload.get('status') not in (None,0):raise SearchUnavailable('Google search could not complete the request.')
- return search_result(form,payload.get('organic',[]),domains,terms)
-def serpapi_predict(form,key):
- domains=tuple(x.strip().lower() for x in os.getenv('BATTERY_SEARCH_ALLOWED_DOMAINS',','.join(DEFAULT_SEARCH_DOMAINS)).split(',') if x.strip())
- terms=battery_search_terms(form)
- if not terms:return {'prediction':None,'confidence':'low','needs_manual_review':True,'message':'No battery-fitment details were available to search.','sources':[],'records':[]}
- query=('compatible battery model capacity Ah '+' '.join(terms)+' ('+' OR '.join('site:'+d for d in domains)+')')[:500]
- params=urllib.parse.urlencode({'api_key':key,'engine':'google','google_domain':'google.co.in','gl':'in','hl':'en','q':query})
- try:
-  with urllib.request.urlopen('https://serpapi.com/search.json?'+params,timeout=int(os.getenv('SERPAPI_TIMEOUT','20'))) as response:payload=json.loads(response.read())
- except urllib.error.HTTPError as error:
-  if error.code in (401,403):raise SearchUnavailable('SerpAPI rejected the API key. Check SERPAPI_API_KEY.') from error
-  raise SearchUnavailable('Google search is temporarily unavailable.') from error
- except Exception as error:raise SearchUnavailable('Google search is temporarily unavailable.') from error
- if payload.get('error'):raise SearchUnavailable('Google search could not complete the request.')
- return search_result(form,payload.get('organic_results',[]),domains,terms)
-def search_result(form,items,domains,terms):
- def allowed(link):
-  host=(urllib.parse.urlsplit(link).hostname or '').lower()
-  return any(host==domain or host.endswith('.'+domain) for domain in domains)
- items=[item for item in items if allowed(item.get('link') or item.get('url',''))]
- sources=[{'title':re.sub(r'\s+',' ',str(item.get('title',''))).strip()[:160],
-           'url':item.get('link') or item.get('url'),'domain':urllib.parse.urlsplit(item.get('link') or item.get('url')).hostname}
-          for item in items[:5]]
- excluded={token.upper() for value in terms for token in re.findall(r'[A-Za-z0-9./-]+',value)};candidates={};evidence={}
- for item in items:
-  text=' '.join((str(item.get('title','')),str(item.get('snippet','')))).upper()
-  for model in re.findall(r'\b(?=[A-Z0-9./-]{3,24}\b)(?=[A-Z0-9./-]*[A-Z])(?=[A-Z0-9./-]*\d)[A-Z0-9][A-Z0-9./-]+\b',text):
-   if model in excluded or re.fullmatch(r'\d+(?:\.\d+)?(?:V|AH|KW|CC|F|M|Y)',model):continue
-   candidates[model]=candidates.get(model,0)+1;evidence.setdefault(model,item)
- if not candidates:return {'prediction':None,'confidence':'low','needs_manual_review':True,'message':'Google returned trusted sources, but no battery model could be extracted safely.','sources':sources,'records':[]}
- model,count=max(candidates.items(),key=lambda pair:pair[1]);item=evidence[model];text=' '.join((str(item.get('title','')),str(item.get('snippet',''))))
- brand=next((label for token,label in (('EXIDE','EXIDE'),('AMARON','AMARON'),('LIVGUARD','LIVGUARD'),('LUMINOUS','LUMINOUS'),('SF SONIC','SF SONIC')) if token in text.upper()),None)
- capacity=re.search(r'\b(\d+(?:\.\d+)?)\s*AH\b',text,re.I)
- record={'source_type':'web','model_no':model,'brand':brand,'capacity_ah':float(capacity.group(1)) if capacity else None,
-         'vehicle_model':fitment_label(form),'source':sources[0]['domain'],'source_url':sources[0]['url']}
- confidence='high' if count>1 else 'medium'
- return {'prediction':record,'confidence':confidence,'needs_manual_review':confidence!='high',
-         'message':'Google recommendation only. Confirm OEM fitment, dimensions, terminal orientation and warranty before sale.',
-         'sources':sources,'records':[record],'shared_fields':[name for name in SEARCH_FIELDS if form.get(name)]}
+ALLOWED_BRANDS=('EXIDE','AMARON','SF SONIC','POWER ZONE','TATA GREEN')
+def brand_key(value):
+ value=norm(value)
+ return {'amron':'amaron','powerzone':'power zone','any verified brand':''}.get(value,value)
+def product_record(product,fitment=None):
+ return {'source_type':'catalogue','brand':product.brand,'model_no':product.model_no,
+         'capacity_ah':product.capacity_ah or (fitment.capacity_ah if fitment else None),
+         'voltage':product.voltage,'warranty':product.warranty,'mrp':product.tentative_price,
+         'price_as_of':product.price_as_of,'source_url':product.source_url,
+         'vehicle_model':fitment.vehicle_model if fitment else None}
+def public_result(result):
+ def safe(record):
+  return {key:value for key,value in (record or {}).items()
+          if key not in ('mrp','tentative_price','price','selling_price','discounted_price',
+                         'price_without_exchange','price_with_exchange','exchange_value')}
+ return {key:value for key,value in result.items() if key not in ('records','sources')} | {
+  'prediction':safe(result.get('prediction')) if result.get('prediction') else None,
+  'alternatives':[safe(row) for row in result.get('alternatives',[])]}
 def predict(form):
- key=os.getenv('SERPBASE_API_KEY')
- fallback_key=os.getenv('SERPAPI_API_KEY')
- if key:
-  try:return serpbase_predict(form,key)
-  except SearchUnavailable:
-   if fallback_key:return serpapi_predict(form,fallback_key)
-   raise
- if fallback_key:return serpapi_predict(form,fallback_key)
- raise SearchUnavailable('Google search is not configured. Add SERPBASE_API_KEY or SERPAPI_API_KEY to .env and restart the server.')
+ from .models import BatteryFitment,BatteryProduct
+ application=fitment_application(form.get('application_key') or form.get('application'))
+ preferred=brand_key(form.get('brand'))
+ make=norm(form.get('vehicle_make'));model=norm(form.get('vehicle_model') or form.get('car_model'))
+ fuel=norm(form.get('fuel_type'));rows=[];products=None
+ if application and make and model:
+  query=BatteryFitment.query.filter_by(application=application,make_key=make,model_key=model)
+  rows=query.all()
+  if fuel:
+   rows=[row for row in rows if row.fuel_key in (fuel,'')]
+  base_rows=rows
+  if preferred:
+   rows=[row for row in rows if row.brand_key==preferred]
+   if not rows:
+    capacities={row.capacity_ah for row in base_rows if row.capacity_ah is not None}
+    if capacities:
+     products=BatteryProduct.query.filter(BatteryProduct.brand_key==preferred,
+       BatteryProduct.capacity_ah.in_(capacities),BatteryProduct.application.in_((application,'vehicle'))).all()
+     rows=[None]*len(products)
+ exact_model=norm(form.get('model_no'))
+ if exact_model:
+  products=BatteryProduct.query.filter_by(model_key=exact_model).all()
+  if preferred:products=[row for row in products if row.brand_key==preferred]
+  rows=[None]*len(products)
+ elif products is None:
+  products=[]
+  for row in rows:
+   matches=BatteryProduct.query.filter_by(brand_key=row.brand_key,model_key=norm(row.model_no)).all()
+   products.append(matches[0] if matches else None)
+ # Capacity-based applications and preferred-brand alternatives stay deterministic.
+ requested_capacity=num(form.get('capacity_ah') or form.get('old_capacity_ah'))
+ if not rows and requested_capacity is not None:
+  query=BatteryProduct.query.filter_by(capacity_ah=requested_capacity)
+  candidates=query.all()
+  if preferred:candidates=[row for row in candidates if row.brand_key==preferred]
+  if application:candidates=[row for row in candidates if row.application in (application,'vehicle')]
+  products=candidates;rows=[None]*len(products)
+ if products is None:products=[]
+ ranked=[]
+ for fitment,product in zip(rows,products):
+  if product is None and fitment is not None:
+   # A verified fitment may not have a price/specification row yet.
+   record={'source_type':'official_fitment','brand':fitment.brand,'model_no':fitment.model_no,
+           'capacity_ah':fitment.capacity_ah,'vehicle_model':fitment.vehicle_model}
+  elif product is not None:record=product_record(product,fitment)
+  else:continue
+  ranked.append(record)
+ unique={brand_key(row['brand'])+'|'+norm(row['model_no']):row for row in ranked}
+ ranked=list(unique.values())
+ if not ranked:
+  return {'prediction':None,'alternatives':[],'confidence':'low','needs_manual_review':True,
+          'message':'No verified catalogue match was found. A BatteryWala expert must confirm the fitment.',
+          'records':[],'method':'sql_exact_filter'}
+ order={brand_key(name):index for index,name in enumerate(ALLOWED_BRANDS)}
+ ranked.sort(key=lambda row:(0 if preferred and brand_key(row['brand'])==preferred else 1,
+                             order.get(brand_key(row['brand']),99),norm(row['model_no'])))
+ return {'prediction':ranked[0],'alternatives':ranked[1:5],'confidence':'high' if make and model else 'medium',
+         'needs_manual_review':False,'message':'Compatible battery found from the verified five-brand catalogue. Confirm dimensions and terminal orientation before installation.',
+         'records':ranked,'method':'sql_exact_filter'}
 
 def _brand(text):
  upper=text.upper()
- for token,label in (('EXIDE','EXIDE'),('AMARON','AMARON'),('PRYCAL','PMK-PRYCAL'),('LIVGUARD','LIVGUARD'),('LUMINOUS','LUMINOUS'),('SF SONIC','SF SONIC')):
+ for token,label in (('EXIDE','EXIDE'),('AMARON','AMARON'),('AMRON','AMARON'),('POWER ZONE','POWER ZONE'),
+                     ('POWERZONE','POWER ZONE'),('SF SONIC','SF SONIC'),('TATA GREEN','TATA GREEN')):
   if token in upper:return label
  return 'UNCLASSIFIED'
 def _application(section):
@@ -192,22 +185,32 @@ def record_key(record):
  if record.get('source_type')=='scrap':return '|'.join(('scrap',norm(record.get('application')),str(num(record.get('capacity_ah')))))
  model=norm(record.get('model_no'))
  return '|'.join((norm(record.get('brand')),model or 'capacity',model or str(num(record.get('capacity_ah')))))
-def _catalog_name(record):return re.sub(r'[^a-z0-9]+','-',norm(record.get('brand') or 'unclassified')).strip('-')+'-'+record.get('source_type','retail')+'.json'
+def _catalog_name(record):return re.sub(r'[^a-z0-9]+','-',norm(record.get('brand'))).strip('-')+'.json'
 def publish(payload):
  CATALOGS.mkdir(parents=True,exist_ok=True);catalogs={}
  for path in CATALOGS.glob('*.json'):catalogs[path.name]=json.loads(path.read_text(encoding='utf-8'))
- locations={record_key(record):(name,index) for name,data in catalogs.items() for index,record in enumerate(data.get('records',[]))}
+ locations={record_key({'brand':data['brand'],**record}):(name,index) for name,data in catalogs.items() for index,record in enumerate(data.get('products',[]))}
  added=updated=0
  for record in payload['records']:
+  canonical=next((name for name in ALLOWED_BRANDS if brand_key(name)==brand_key(record.get('brand'))),None)
+  if not canonical or record.get('source_type')=='scrap':continue
+  record={'brand':canonical,'application':record.get('application') or 'vehicle','model_no':record.get('model_no'),
+          'capacity_ah':record.get('capacity_ah'),'warranty':record.get('warranty'),
+          'tentative_price':record.get('mrp'),'price_as_of':payload.get('generated_at'),
+          'source_url':record.get('source_url') or record.get('source')}
   key=record_key(record)
   if key in locations:
-   name,index=locations[key];catalogs[name]['records'][index]=record;updated+=1
+   name,index=locations[key];catalogs[name]['products'][index]={k:v for k,v in record.items() if k!='brand'};updated+=1
   else:
-   name=_catalog_name(record);data=catalogs.setdefault(name,{'schema_version':'2.0','records':[]})
-   locations[key]=(name,len(data['records']));data['records'].append(record);added+=1
+   name=_catalog_name({'brand':canonical});data=catalogs.setdefault(name,{'schema_version':'3.0','brand':canonical,'source_urls':[],'products':[],'fitments':[]})
+   locations[key]=(name,len(data['products']));data['products'].append({k:v for k,v in record.items() if k!='brand'});added+=1
  for name,data in catalogs.items():
   data['updated_at']=payload.get('generated_at');target=CATALOGS/name;tmp=target.with_suffix('.tmp')
   tmp.write_text(json.dumps(data,indent=2),encoding='utf-8');tmp.replace(target)
+ from flask import has_app_context
+ if has_app_context():
+  from . import ensure_battery_catalog
+  ensure_battery_catalog(force=True)
  return {'added':added,'updated':updated,'catalogs':len(catalogs)}
 def notify(lead,form,result,recipients,include_customer=True):
  subject=f"BatteryWala recommendation for {lead.name}"; body=f"Hello {lead.name},\n\nRecommendation: {json.dumps(result,indent=2)}\n\nRequest: {json.dumps(form,indent=2)}"

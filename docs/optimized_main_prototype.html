@@ -321,7 +321,7 @@ html{scroll-padding-top:104px}.section[id],main section[id]{scroll-margin-top:10
       const title = document.createElement('h4');
       title.textContent = p ? `Recommended: ${p.brand || 'Verified brand'} ${p.model_no || 'model pending review'}` : 'Manual review required';
       const detail = document.createElement('p');
-      detail.textContent = p ? [p.capacity_ah ? p.capacity_ah + 'Ah' : '', p.mrp ? 'MRP Rs. ' + p.mrp : ''].filter(Boolean).join(' · ') : j.message;
+      detail.textContent = p ? [p.capacity_ah ? p.capacity_ah + 'Ah' : '', p.warranty || 'Fitment confirmation required'].filter(Boolean).join(' · ') : j.message;
       box.append(title, detail);
       window.dispatchEvent(new CustomEvent('batterywala:submission', {detail: {form: payload, prediction: j}}));
     } catch (err) {

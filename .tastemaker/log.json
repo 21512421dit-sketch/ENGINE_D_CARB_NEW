@@ -1,0 +1,12 @@
+[
+  {
+    "date": "2026-09-07",
+    "page": "operations-portal",
+    "macrostructure": "App shell",
+    "nav": "sticky-sidebar",
+    "hero": "none",
+    "footer": "none",
+    "knobs": "nav=left/active-border; content=metrics/table/forms; switch=segmented",
+    "brief": "Shared BatteryWala and Engine D-Carb admin and employee portal"
+  }
+]

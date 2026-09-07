@@ -1,0 +1,643 @@
+{
+  "schema_version": "3.0",
+  "brand": "TATA GREEN",
+  "source_urls": [
+    "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+  ],
+  "products": [
+    {
+      "application": "commercial_vehicle",
+      "model_no": "105E41",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "130F51 ROADSTAR",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "135G51",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "150G51",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "180H52 ROADSTAR",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "38B20",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "70D26",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "80D31",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "34B19L PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "34B20L PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "36B19L PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "36B20L PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "40B20L PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "40B20R PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "55B24L PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "55D23L PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "70D23 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "70D26 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "80D31 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "DIN100 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "DIN44 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "DIN50 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "DIN60 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "DIN65 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "DIN75 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "DIN80 PREMIO",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "M-42 PREMIO ISS",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 36B19L-AM",
+      "capacity_ah": 32,
+      "voltage": 12,
+      "tentative_price": 3878,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 40B20L BH",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 4863,
+      "price_as_of": "2026-09-07",
+      "warranty": "30F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 40B20L PR2436",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 4099,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 40B20L PR3036",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 4442,
+      "price_as_of": "2026-09-07",
+      "warranty": "30F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 40B20R BH",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 4863,
+      "price_as_of": "2026-09-07",
+      "warranty": "30F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 40B20R PR2436",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 4099,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 40B20R PR3036",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 4442,
+      "price_as_of": "2026-09-07",
+      "warranty": "30F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 55B24L (T1)",
+      "capacity_ah": 45,
+      "voltage": 12,
+      "tentative_price": 6146,
+      "price_as_of": "2026-09-07",
+      "warranty": "30F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 55B24LS",
+      "capacity_ah": 45,
+      "voltage": 12,
+      "tentative_price": 7270,
+      "price_as_of": "2026-09-07",
+      "warranty": "30F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 55D23L",
+      "capacity_ah": 54,
+      "voltage": 12,
+      "tentative_price": 5723,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 70D23L-BH",
+      "capacity_ah": 68,
+      "voltage": 12,
+      "tentative_price": 6697,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 70D23R-BH",
+      "capacity_ah": 68,
+      "voltage": 12,
+      "tentative_price": 6697,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 70D26L PR3036",
+      "capacity_ah": 70,
+      "voltage": 12,
+      "tentative_price": 7780,
+      "price_as_of": "2026-09-07",
+      "warranty": "30F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 70D26R PR2436",
+      "capacity_ah": 65,
+      "voltage": 12,
+      "tentative_price": 7343,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 70D26R PR3036",
+      "capacity_ah": 70,
+      "voltage": 12,
+      "tentative_price": 7780,
+      "price_as_of": "2026-09-07",
+      "warranty": "30F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 80D31L",
+      "capacity_ah": 80,
+      "voltage": 12,
+      "tentative_price": 8011,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO 80D31R",
+      "capacity_ah": 80,
+      "voltage": 12,
+      "tentative_price": 8011,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "PREMIO M-42 ISS",
+      "capacity_ah": 38,
+      "voltage": 12,
+      "tentative_price": 4460,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+36P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV DIN44L",
+      "capacity_ah": 44,
+      "voltage": 12,
+      "tentative_price": 5447,
+      "price_as_of": "2026-09-07",
+      "warranty": "18F+18P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV DIN44R",
+      "capacity_ah": 44,
+      "voltage": 12,
+      "tentative_price": 5447,
+      "price_as_of": "2026-09-07",
+      "warranty": "18F+18P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV DIN50L",
+      "capacity_ah": 50,
+      "voltage": 12,
+      "tentative_price": 5861,
+      "price_as_of": "2026-09-07",
+      "warranty": "18F+18P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV DIN50R",
+      "capacity_ah": 50,
+      "voltage": 12,
+      "tentative_price": 5861,
+      "price_as_of": "2026-09-07",
+      "warranty": "18F+18P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV DIN60L",
+      "capacity_ah": 60,
+      "voltage": 12,
+      "tentative_price": 6866,
+      "price_as_of": "2026-09-07",
+      "warranty": "18F+18P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV DIN65L",
+      "capacity_ah": 65,
+      "voltage": 12,
+      "tentative_price": 7459,
+      "price_as_of": "2026-09-07",
+      "warranty": "18F+18P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV1000",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV600",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV600R",
+      "capacity_ah": 55,
+      "voltage": 12,
+      "tentative_price": 5942,
+      "price_as_of": "2026-09-07",
+      "warranty": "24F+24P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV800",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "SLV900",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "TG400L",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 3835,
+      "price_as_of": "2026-09-07",
+      "warranty": "12F+12P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "TG550L",
+      "capacity_ah": 54,
+      "voltage": 12,
+      "tentative_price": 5011,
+      "price_as_of": "2026-09-07",
+      "warranty": "12F+12P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "TG550R",
+      "capacity_ah": 54,
+      "voltage": 12,
+      "tentative_price": 5011,
+      "price_as_of": "2026-09-07",
+      "warranty": "12F+12P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "TGX 400L",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 3759,
+      "price_as_of": "2026-09-07",
+      "warranty": "18F+18P",
+      "source_url": "https://www.tatagreenbattery.com/batteries-for-car-muv-suv/"
+    },
+    {
+      "application": "generator",
+      "model_no": "105E41 GENSTAR",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "tractor",
+      "model_no": "75D31",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "tractor",
+      "model_no": "95E41",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "GYZ20L",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "TG2.5D",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "TG7D",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "TG9D",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YB14L-A2",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YT5A",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YTZ10S",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YTZ14S",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YTZ4",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YTZ4-H",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YTZ5",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YTZ6V-H",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YTZ7",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YTZ7-H",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    },
+    {
+      "application": "two_wheeler",
+      "model_no": "YTZ9",
+      "voltage": 12,
+      "warranty": "Refer to official model warranty table",
+      "source_url": "https://www.tatagreenbattery.com/wp-content/uploads/2025/02/Tata_Green_Batteries_Online_Warranty_Manual.pdf"
+    }
+  ],
+  "fitments": []
+}

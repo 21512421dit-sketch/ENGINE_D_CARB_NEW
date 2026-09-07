@@ -1,0 +1,180 @@
+{
+  "schema_version": "3.0",
+  "brand": "SF SONIC",
+  "source_urls": [
+    "https://www.exideindustries.com/international-business/mobility-export-batteries/sf-sonic.aspx"
+  ],
+  "products": [
+    {
+      "application": "commercial_vehicle",
+      "model_no": "24S-40L",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 3788,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "24S-60L/R",
+      "capacity_ah": 60,
+      "voltage": 12,
+      "tentative_price": 5550,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "42S-100H29R",
+      "capacity_ah": 100,
+      "voltage": 12,
+      "tentative_price": 8659,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F+18P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "42S-100R",
+      "capacity_ah": 100,
+      "voltage": 12,
+      "tentative_price": 9137,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F+18P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "42S-130R",
+      "capacity_ah": 130,
+      "voltage": 12,
+      "tentative_price": 11420,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F+18P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "42S-150R",
+      "capacity_ah": 150,
+      "voltage": 12,
+      "tentative_price": 14750,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F+18P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "42S-180R",
+      "capacity_ah": 180,
+      "voltage": 12,
+      "tentative_price": 16720,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F+18P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "42S-80R",
+      "capacity_ah": 80,
+      "voltage": 12,
+      "tentative_price": 7260,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F+18P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "commercial_vehicle",
+      "model_no": "42S-88L",
+      "capacity_ah": 88,
+      "voltage": 12,
+      "tentative_price": 7862,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F+18P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "66S-38B20R/L",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 4177,
+      "price_as_of": "2025-04-01",
+      "warranty": "33F+33P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "66S-40B20R/L",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 4373,
+      "price_as_of": "2025-04-01",
+      "warranty": "33F+33P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "66S-40LBH/RBH",
+      "capacity_ah": 40,
+      "voltage": 12,
+      "tentative_price": 4878,
+      "price_as_of": "2025-04-01",
+      "warranty": "33F+33P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "72S-35R/L",
+      "capacity_ah": 35,
+      "voltage": 12,
+      "tentative_price": 4471,
+      "price_as_of": "2025-04-01",
+      "warranty": "36F+36P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "72S-55LS",
+      "capacity_ah": 45,
+      "voltage": 12,
+      "tentative_price": 7519,
+      "price_as_of": "2025-04-01",
+      "warranty": "36F+36P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "72S-DIN100L",
+      "capacity_ah": 100,
+      "voltage": 12,
+      "tentative_price": 18910,
+      "price_as_of": "2025-04-01",
+      "warranty": "36F+36P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "four_wheeler",
+      "model_no": "72S-DIN74L",
+      "capacity_ah": 74,
+      "voltage": 12,
+      "tentative_price": 11408,
+      "price_as_of": "2025-04-01",
+      "warranty": "36F+36P",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    },
+    {
+      "application": "three_wheeler",
+      "model_no": "24S-32R",
+      "capacity_ah": 32,
+      "voltage": 12,
+      "tentative_price": 3303,
+      "price_as_of": "2025-04-01",
+      "warranty": "24F",
+      "source_url": "https://www.scribd.com/document/861370706/SF-SONIC-Vehicular-Price-List-wef-01-04-2025"
+    }
+  ],
+  "fitments": []
+}

@@ -19,8 +19,12 @@ def create_app(test_config=None):
  app.register_blueprint(bp)
  from .quotations import bp as quotations_bp
  app.register_blueprint(quotations_bp)
+ from .portal import bp as portal_bp
+ app.register_blueprint(portal_bp)
  with app.app_context():
-  db.create_all(); ensure_admin(app); ensure_fitments()
+  db.create_all(); ensure_admin(app); ensure_battery_catalog(force=True)
+  from .portal import purge_expired_submissions
+  purge_expired_submissions()
  return app
 
 def ensure_admin(app):
@@ -30,23 +34,28 @@ def ensure_admin(app):
  if not User.query.filter_by(email=email).first():
   db.session.add(User(email=email,password_hash=generate_password_hash(os.getenv('ADMIN_PASSWORD','ChangeMe123!')),is_admin=True)); db.session.commit()
 
-def ensure_fitments():
- from .models import BatteryFitment
- path=Path(__file__).resolve().parent/'data'/'fitments.json'
- records=json.loads(path.read_text(encoding='utf-8')).get('fitments',[]) if path.exists() else []
- expected=sum(len(item.get('batteries',[])) for item in records)
- expected_applications={item['application'] for item in records}
- current_applications={row[0] for row in db.session.query(BatteryFitment.application).distinct()}
- # ponytail: count plus category set catches the current migration without a metadata table.
- if BatteryFitment.query.count()==expected and current_applications==expected_applications:return
- BatteryFitment.query.delete()
+def ensure_battery_catalog(force=False):
+ from .models import BatteryFitment,BatteryProduct
+ paths=sorted((Path(__file__).resolve().parent/'data'/'brands').glob('*.json'))
+ payloads=[json.loads(path.read_text(encoding='utf-8')) for path in paths]
+ expected_fitments=sum(len(data.get('fitments',[])) for data in payloads)
+ expected_products=sum(len(data.get('products',[])) for data in payloads)
+ if not force and BatteryFitment.query.count()==expected_fitments and BatteryProduct.query.count()==expected_products:return
+ BatteryFitment.query.delete();BatteryProduct.query.delete()
  def key(value):return re.sub(r'[^a-z0-9]+',' ',str(value or '').lower()).strip()
- rows=[]
- for item in records:
-  for battery in item.get('batteries',[]):
-   rows.append({'application':item['application'],'vehicle_make':item['vehicle_make'],'make_key':key(item['vehicle_make']),
+ fitments=[];products=[]
+ for data in payloads:
+  brand=data['brand']
+  for item in data.get('fitments',[]):
+   fitments.append({'application':item['application'],'vehicle_make':item['vehicle_make'],'make_key':key(item['vehicle_make']),
     'vehicle_model':item['vehicle_model'],'model_key':key(item['vehicle_model']),'fuel_type':item.get('fuel_type'),
-    'fuel_key':key(item.get('fuel_type')),'brand':battery['brand'],'brand_key':key(battery['brand']),
-    'model_no':battery['model_no'],'capacity_ah':battery.get('capacity_ah')})
- if rows:db.session.bulk_insert_mappings(BatteryFitment,rows)
+    'fuel_key':key(item.get('fuel_type')),'brand':brand,'brand_key':key(brand),
+    'model_no':item['model_no'],'capacity_ah':item.get('capacity_ah')})
+  for item in data.get('products',[]):
+   products.append({'brand':brand,'brand_key':key(brand),'application':item.get('application','vehicle'),
+    'model_no':item['model_no'],'model_key':key(item['model_no']),'capacity_ah':item.get('capacity_ah'),
+    'voltage':item.get('voltage'),'warranty':item.get('warranty'),'tentative_price':item.get('tentative_price'),
+    'price_as_of':item.get('price_as_of'),'source_url':item.get('source_url')})
+ if fitments:db.session.bulk_insert_mappings(BatteryFitment,fitments)
+ if products:db.session.bulk_insert_mappings(BatteryProduct,products)
  db.session.commit()

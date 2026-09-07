@@ -257,6 +257,9 @@
         <p class="bw-schema-note" data-schema-note role="status"></p>
         <div class="bw-form-grid" data-dynamic-fields></div>
         <input type="hidden" name="application"><input type="hidden" name="battery_type">
+        <label class="bw-consent"><input type="checkbox" name="consent" value="true" required>
+          <span>I consent to BatteryWala storing the details I submit for 24 months to prepare and manage my quotation and analyze service demand. My information will not be sold or used for promotional marketing. I can request correction or deletion using the contact details on this website.</span>
+        </label>
         <div class="bw-prediction" id="bwPrediction"></div>
         <div class="formNav"><button class="btn primary" type="submit">Find compatible battery</button><button class="btn light" type="reset">Reset</button></div>`;
       if (predictionPanel) requestForm.querySelector('#bwPrediction').replaceWith(predictionPanel);
@@ -270,6 +273,41 @@
       });
       const option = (value, label) => {
         const item = document.createElement('option'); item.value = value; item.textContent = label; return item;
+      };
+      const loadFitmentOptions = async (control, field, values, emptyLabel) => {
+        if (!control) return [];
+        control.replaceChildren(option('', 'Loading…')); control.disabled = true;
+        const params = new URLSearchParams({field, application: applicationSelect.value, ...values});
+        const response = await fetch(`/api/fitment-options?${params}`, {headers: {'ngrok-skip-browser-warning': '1'}});
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || 'Unable to load battery options');
+        control.replaceChildren(option('', emptyLabel));
+        payload.options.forEach(value => control.append(option(value, value)));
+        control.disabled = false;
+        return payload.options;
+      };
+      const installFitmentFilters = () => {
+        const make = requestForm.elements.vehicle_make;
+        const model = requestForm.elements.vehicle_model;
+        const fuel = requestForm.elements.fuel_type;
+        const brand = requestForm.elements.brand;
+        if (!make || !model) return;
+        const reset = (control, label) => { if (control) { control.replaceChildren(option('', label)); control.disabled = true; } };
+        reset(model, 'Select a make first');
+        if (brand) reset(brand, 'Any of the five brands');
+        loadFitmentOptions(make, 'makes', {}, 'Select a make').catch(error => { note.textContent = error.message; });
+        const refreshBrands = () => {
+          if (!brand || !make.value || !model.value) return;
+          loadFitmentOptions(brand, 'brands', {make: make.value, model: model.value, fuel: fuel?.value || ''}, 'Any of the five brands')
+            .catch(error => { note.textContent = error.message; });
+        };
+        make.addEventListener('change', () => {
+          reset(model, 'Select a make first'); if (brand) reset(brand, 'Any of the five brands');
+          if (make.value) loadFitmentOptions(model, 'models', {make: make.value}, 'Select a model')
+            .catch(error => { note.textContent = error.message; });
+        });
+        model.addEventListener('change', refreshBrands);
+        fuel?.addEventListener('change', refreshBrands);
       };
       const renderFields = schema => {
         fieldsHost.replaceChildren();
@@ -300,7 +338,7 @@
           wrapper.hidden = !visible;
           const control = wrapper.querySelector('input,select,textarea'); control.disabled = !visible; control.required = visible && control.dataset.schemaRequired === 'true';
         });
-        fieldsHost.addEventListener('change', updateConditions); updateConditions();
+        fieldsHost.addEventListener('change', updateConditions); updateConditions(); installFitmentFilters();
       };
       fetch('/api/form-schemas', {headers: {'ngrok-skip-browser-warning': '1'}}).then(response => {
         if (!response.ok) throw new Error('Unable to load form options');

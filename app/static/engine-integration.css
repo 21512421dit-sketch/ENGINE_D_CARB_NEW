@@ -1,0 +1,6 @@
+/* tastemaker · imported Engine D-Carb narrative + consent transaction · palette preserved · critique: ShowTell 5 · Phil 5 · Hier 4 · Spec 5 · Restr 4 · Var 4 */
+.engine-consent{grid-column:1/-1;display:grid;grid-template-columns:22px minmax(0,1fr);align-items:start;gap:12px;margin:18px 0 4px;padding:16px;border:1px solid rgba(16,46,60,.18);border-radius:12px;background:rgba(255,255,255,.72);color:#263b49;font-size:12px;line-height:1.55;cursor:pointer}
+.engine-consent input{width:20px;height:20px;margin:1px 0 0;accent-color:#ff7a14}
+.engine-consent:focus-within{outline:3px solid rgba(255,122,20,.32);outline-offset:3px}
+.enquiry-submit[aria-busy="true"]{opacity:.72;cursor:wait}
+@media(max-width:640px){.engine-consent{padding:14px;font-size:11px}}

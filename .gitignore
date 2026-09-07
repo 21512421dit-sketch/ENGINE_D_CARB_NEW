@@ -6,6 +6,10 @@ __pycache__/
 .pytest_cache/
 .pytest-*/
 .test-temp-*/
+/.test-*/
+/test-runtime-*/
+/tmp/
+/.test-tmp/
 
 # Local configuration and runtime data
 .env

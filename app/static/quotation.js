@@ -8,7 +8,7 @@
   panel.setAttribute('aria-label', 'Your quotation');
   panel.innerHTML = `
     <h3 tabindex="-1">Your quotation is ready</h3>
-    <p data-quote-summary></p><p data-quote-note></p>
+    <p data-quote-summary></p>
     <form data-quote-delivery>
       <h4>How should the quotation be sent to you?</h4>
       <p>Choose email, mobile number, or both.</p>
@@ -50,7 +50,6 @@
     toggleFields();
     panel.querySelector('h3').textContent = quote.status === 'priced' ? 'Your quotation is ready' : 'Quotation generated — price confirmation required';
     panel.querySelector('[data-quote-summary]').textContent = `${quote.number} · ${quote.message}`;
-    panel.querySelector('[data-quote-note]').textContent = quote.note;
     status.textContent = '';
     panel.hidden = false;
     panel.querySelector('h3').focus();

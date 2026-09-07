@@ -16,15 +16,16 @@ from urllib.parse import urlsplit
 
 import fitz
 from flask import Blueprint, abort, current_app, jsonify, request, url_for
+from flask_login import current_user
 
 from . import db
 from .models import Delivery, Lead, Recipient
-from .services import SearchUnavailable, load_data, norm, notify, predict, validate_form
+from .services import load_data, norm, notify, predict, public_result, validate_form
 
 bp = Blueprint('quotations', __name__)
 NOTES = {
-    'yes': 'Discounted Price is after deducting the exchange value of old battery and it is including 18% GST',
-    'no': 'Discounted Price is including 18% GST',
+    'yes': 'Tentative price includes 18% GST and the estimated old-battery exchange value.',
+    'no': 'Tentative price includes 18% GST. Final price is confirmed by BatteryWala before sale.',
 }
 SEARCH_ATTEMPTS = defaultdict(deque)
 
@@ -226,7 +227,7 @@ def render_pdf(lead, quote):
             baseline = section('Vehicle', vehicle_pairs, baseline)
             if detail_pairs:
                 baseline = section('Requirement', detail_pairs, baseline)
-            write('Battery Options', 32, baseline, size=12, bold=True)
+            write('Battery Options - Tentative Prices', 32, baseline, size=12, bold=True)
             top = baseline + 14.4
             # Copy the original rounded header and fixed column widths unchanged.
             fragment((31, 272.55, 564.28, 297.45), top - 1)
@@ -271,12 +272,22 @@ def render_pdf(lead, quote):
 @bp.post('/api/quotations')
 def create_quotation():
     payload = request.get_json(silent=True)
-    if not isinstance(payload, dict) or any(not isinstance(v, str) for v in payload.values()):
+    if not isinstance(payload, dict) or any(not isinstance(v, (str, bool)) for v in payload.values()):
         return jsonify(error='Please submit valid form fields.'), 400
     limits = {'name': 120, 'email': 255, 'phone': 40, 'doubts': 2000}
-    if any(len(v) > limits.get(k, 200) for k, v in payload.items()) or len(payload) > 30:
+    if any(len(v) > limits.get(k, 200) for k, v in payload.items() if isinstance(v, str)) or len(payload) > 35:
         return jsonify(error='One or more form fields are too long.'), 400
-    form = {k: v.strip() for k, v in payload.items()}
+    form = {k: v.strip() if isinstance(v, str) else v for k, v in payload.items()}
+    consented = form.get('consent') is True or str(form.get('consent', '')).lower() == 'true'
+    if not consented:
+        return jsonify(error='Consent is required before we can store your details and prepare the quotation.'), 400
+    employee = current_user.is_authenticated and not current_user.is_admin
+    if employee:
+        form['brand'] = form.get('expert_battery_brand') or form.get('brand', '')
+        form['model_no'] = form.get('expert_battery_model') or form.get('model_no', '')
+    else:
+        form.pop('expert_battery_brand', None)
+        form.pop('expert_battery_model', None)
     form['application'] = form.get('application') or form.get('battery_type', '')
     missing = validate_form(form) if form.get('application_key') else []
     if missing:
@@ -294,17 +305,14 @@ def create_quotation():
     # ponytail: per-process rate limit; move to the reverse proxy when multiple workers are deployed.
     if len(attempts)>=30:return jsonify(error='Too many battery searches. Please try again later.'),429
     attempts.append(now)
-    try:
-        result = predict(form)
-    except SearchUnavailable as error:
-        return jsonify(error=str(error)), 503
+    result = predict(form)
     options = quotation_options(form, result, records=result.get('records',[]))
     provisional = any(item.get('provisional') for item in options)
     pending = not options or provisional or any(item['price'] is None for item in options)
     message = ('No verified battery match is available. This document is not a confirmed price offer.' if not options
                else 'Recommended battery shown. Fitment and final price confirmation are required.' if provisional
                else 'Price confirmation required. This document is not a confirmed price offer.' if pending
-               else 'Prices include 18% GST. Battery fitment is subject to confirmation.')
+               else 'Tentative price prepared. Final price and battery fitment are subject to confirmation.')
     quote = {'exchange': form['exchange_old_battery'], 'note': NOTES[form['exchange_old_battery']],
              'date': datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime('%d/%m/%Y'),
              'options': options, 'status': 'pending_review' if pending else 'priced',
@@ -317,11 +325,15 @@ def create_quotation():
     # Store the snapshot, so later catalogue updates cannot change this quote.
     lead.result_json = json.dumps({**result, 'quotation': quote})
     render_pdf(lead, quote)  # Validate rendering before committing the request.
+    from .portal import record_submission
+    record_submission('batterywala', 'quotation', form, {**result, 'quotation': {k: v for k, v in quote.items() if k != 'token'}}, lead.id, consented=True)
     db.session.commit()
     notify(lead, form, result, Recipient.query.all(), include_customer=False)
     path = url_for('quotations.download', lead_id=lead.id, token=quote['token'])
-    return jsonify({**result, 'quotation': {k: v for k, v in quote.items() if k != 'token'} | {
-        'send_url': path.removesuffix('/pdf') + '/send'}})
+    safe_quote={'number':quote['number'],'status':quote['status'],
+                'message':'Your private quotation is ready to send. It contains the tentative price.',
+                'send_url':path.removesuffix('/pdf') + '/send'}
+    return jsonify({**public_result(result), 'quotation':safe_quote})
 
 
 def get_quotation(lead_id, token):
@@ -335,6 +347,8 @@ def get_quotation(lead_id, token):
 @bp.get('/api/quotations/<int:lead_id>/<token>/pdf')
 def download(lead_id, token):
     lead, quote = get_quotation(lead_id, token)
+    if not Delivery.query.filter_by(lead_id=lead.id, status='sent').first():
+        abort(404)
     return current_app.response_class(render_pdf(lead, quote), mimetype='application/pdf', headers={
         'Content-Disposition': f'attachment; filename="BatteryWala-{quote["number"]}.pdf"',
         'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer',

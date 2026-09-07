@@ -482,3 +482,7 @@ video { max-width: 100%; }
   .heroCopy { padding-top: 28px; }
   .heroMeta { margin-top: 24px; }
 }
+/* tastemaker · app integration · technical service palette · critique: ShowTell 4 · Phil 5 · Hier 4 · Spec 5 · Restr 4 · Var 4 */
+.bw-consent{display:grid!important;grid-template-columns:22px minmax(0,1fr);align-items:start;gap:12px;margin:22px 0;color:#38435f;font-size:12px;line-height:1.55;cursor:pointer}
+.bw-consent input{width:20px!important;height:20px!important;margin:1px 0 0;accent-color:#ff5a1f}
+.bw-consent:focus-within{outline:3px solid rgba(255,90,31,.28);outline-offset:5px;border-radius:8px}
