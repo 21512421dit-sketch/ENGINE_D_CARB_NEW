@@ -39,10 +39,21 @@
       if (!response.ok) throw new Error(result.error || 'Unable to save the enquiry.');
       form.dataset.backendSaved = 'true';
       form.requestSubmit();
+      const enquiryType = payload.enquiryType;
+      const title = document.getElementById('quoteTitle');
       const greeting = document.getElementById('quoteGreeting');
-      if (greeting && result.indicative_cost) {
-        greeting.textContent = `Indicative Engine D-Carb service cost: ${new Intl.NumberFormat('en-IN', {style: 'currency', currency: 'INR', maximumFractionDigits: 0}).format(result.indicative_cost)}. Continue below to request confirmation and service-centre details.`;
+      if (enquiryType === 'machine') {
+        title.textContent = `Thank you, ${payload.representativeName}. Your machine enquiry has been received.`;
+        greeting.textContent = 'Our machine sales team will review your business requirements and contact you about the most suitable Engine D-Carb configuration. Select Continue to send the prepared enquiry on WhatsApp.';
+      } else {
+        title.textContent = `Thank you, ${payload.customerName}. Your vehicle service enquiry has been received.`;
+        const cost = result.indicative_cost
+          ? ` The current tentative estimate is ${new Intl.NumberFormat('en-IN', {style: 'currency', currency: 'INR', maximumFractionDigits: 0}).format(result.indicative_cost)}; the service team will confirm the final price.`
+          : '';
+        greeting.textContent = `Your vehicle details are ready for the Engine D-Carb service team.${cost} Select Continue to request confirmation and the nearest service-centre details.`;
       }
+      form.hidden = true;
+      document.getElementById('quoteResult')?.focus({preventScroll: true});
     } catch (failure) {
       error.textContent = failure.message;
       error.classList.add('visible');

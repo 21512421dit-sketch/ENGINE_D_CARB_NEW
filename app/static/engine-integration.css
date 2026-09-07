@@ -3,4 +3,5 @@
 .engine-consent input{width:20px;height:20px;margin:1px 0 0;accent-color:#ff7a14}
 .engine-consent:focus-within{outline:3px solid rgba(255,122,20,.32);outline-offset:3px}
 .enquiry-submit[aria-busy="true"]{opacity:.72;cursor:wait}
+.quote-result:focus{outline:3px solid rgba(255,122,20,.34);outline-offset:5px}
 @media(max-width:640px){.engine-consent{padding:14px;font-size:11px}}
