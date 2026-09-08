@@ -30,9 +30,14 @@
       }
       const wrapper = document.createElement('label'); if (field.type === 'textarea') wrapper.className = 'wide';
       wrapper.append(document.createTextNode(`${field.label}${field.required ? ' *' : ''}`));
-      if (field.type === 'select') {
+      const selectOptions = Array.isArray(field.options) ? field.options : [];
+      if (field.type === 'select' && selectOptions.length) {
         control = document.createElement('select'); control.append(option('', 'Select'));
-        (field.options || []).forEach(item => control.append(option(typeof item === 'string' ? item : item.value, typeof item === 'string' ? item : item.label)));
+        selectOptions.forEach(item => control.append(option(typeof item === 'string' ? item : item.value, typeof item === 'string' ? item : item.label)));
+      } else if (field.type === 'select') {
+        control = document.createElement('input'); control.type = 'text';
+        control.placeholder = `Enter ${field.label.toLowerCase()} manually…`;
+        control.autocomplete = 'off';
       } else if (field.type === 'textarea') control = document.createElement('textarea');
       else { control = document.createElement('input'); control.type = field.type || 'text'; }
       control.name = field.name;

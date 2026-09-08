@@ -44,6 +44,15 @@ def test_consent_engine_pricing_and_retention(tmp_path):
         assert 729 <= (item.expires_at.replace(tzinfo=timezone.utc) - item.created_at.replace(tzinfo=timezone.utc)).days <= 731
 
 
+def test_employee_empty_dropdowns_allow_manual_entry(tmp_path):
+    app = make_app(tmp_path)
+    client = app.test_client()
+    script = client.get('/static/employee-portal.js')
+    assert script.status_code == 200
+    assert b"field.type === 'select' && selectOptions.length" in script.data
+    assert b"Enter ${field.label.toLowerCase()} manually" in script.data
+
+
 def test_admin_adds_employee_employee_machine_and_filtered_excel(tmp_path):
     app = make_app(tmp_path)
     client = app.test_client()
