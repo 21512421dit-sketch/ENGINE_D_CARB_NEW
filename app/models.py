@@ -26,6 +26,20 @@ class Upload(db.Model):
  id=db.Column(db.Integer,primary_key=True); filename=db.Column(db.String(255)); sha256=db.Column(db.String(64)); record_count=db.Column(db.Integer); status=db.Column(db.String(30)); created_at=db.Column(db.DateTime,default=lambda:datetime.now(timezone.utc))
 class Delivery(db.Model):
  id=db.Column(db.Integer,primary_key=True); lead_id=db.Column(db.Integer); channel=db.Column(db.String(20)); target=db.Column(db.String(255)); status=db.Column(db.String(30)); detail=db.Column(db.Text); created_at=db.Column(db.DateTime,default=lambda:datetime.now(timezone.utc))
+class EngineCentre(db.Model):
+ id=db.Column(db.Integer,primary_key=True)
+ key=db.Column(db.String(40),unique=True,nullable=False,index=True)
+ name=db.Column(db.String(120),nullable=False)
+ address=db.Column(db.String(500),nullable=False)
+ sort_order=db.Column(db.Integer,nullable=False,default=0)
+ contacts=db.relationship('EngineCentreContact',back_populates='centre',cascade='all, delete-orphan',order_by='EngineCentreContact.id')
+class EngineCentreContact(db.Model):
+ id=db.Column(db.Integer,primary_key=True)
+ centre_id=db.Column(db.Integer,db.ForeignKey('engine_centre.id'),nullable=False,index=True)
+ contact_name=db.Column(db.String(120),nullable=False,default='Centre contact')
+ phone=db.Column(db.String(10),nullable=False)
+ centre=db.relationship('EngineCentre',back_populates='contacts')
+ __table_args__=(db.UniqueConstraint('centre_id','phone',name='uq_engine_centre_phone'),)
 class BatteryFitment(db.Model):
  id=db.Column(db.Integer,primary_key=True)
  application=db.Column(db.String(40),nullable=False,index=True)

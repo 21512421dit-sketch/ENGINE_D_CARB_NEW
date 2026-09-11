@@ -4,4 +4,6 @@
 .engine-consent:focus-within{outline:3px solid rgba(255,122,20,.32);outline-offset:3px}
 .enquiry-submit[aria-busy="true"]{opacity:.72;cursor:wait}
 .quote-result:focus{outline:3px solid rgba(255,122,20,.34);outline-offset:5px}
+.engine-centre-preview{min-height:54px;padding:13px 15px;border-left:3px solid #22bdf2;border-radius:0 10px 10px 0;background:#f2fbff;color:#426071;font-size:12px;line-height:1.55}
+.engine-message-preview{display:grid;gap:11px;margin-top:20px;padding:18px;border:1px solid rgba(34,189,242,.35);border-radius:16px;background:#fff}.engine-message-preview>strong{color:#062b49}.engine-message-preview pre{max-height:250px;margin:0;padding:14px;border-radius:10px;background:#eef6fb;color:#263b49;font:12px/1.6 inherit;white-space:pre-wrap;overflow:auto}.quote-action[aria-disabled="true"]{opacity:.58;cursor:not-allowed;pointer-events:none}
 @media(max-width:640px){.engine-consent{padding:14px;font-size:11px}}

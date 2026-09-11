@@ -1,3 +1,4 @@
 2026-09-07 | pending-review | Combined operations portal uses a navy technical shell with orange actions, while preserving each public site's existing identity.
 2026-09-07 | kept | Business switch is explicit in both admin and employee views; exports remain separated by business.
 2026-09-07 | kept | Motion is limited to short panel and control feedback because this is an operational interface.
+2026-09-09 | pending-review | Engine D-Carb centre selection uses an address preview in the customer form and compact per-centre contact cards in admin, preserving the established technical navy/orange interface.

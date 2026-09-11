@@ -24,6 +24,8 @@ def create_app(test_config=None):
  with app.app_context():
   db.create_all(); ensure_admin(app); ensure_battery_catalog(force=True)
   from .portal import purge_expired_submissions
+  from .portal import ensure_engine_centres
+  ensure_engine_centres()
   purge_expired_submissions()
  return app
 
@@ -42,7 +44,9 @@ def ensure_battery_catalog(force=False):
  expected_products=sum(len(data.get('products',[])) for data in payloads)
  if not force and BatteryFitment.query.count()==expected_fitments and BatteryProduct.query.count()==expected_products:return
  BatteryFitment.query.delete();BatteryProduct.query.delete()
- def key(value):return re.sub(r'[^a-z0-9]+',' ',str(value or '').lower()).strip()
+ def key(value):
+  value=re.sub(r'[^a-z0-9]+',' ',str(value or '').lower()).strip()
+  return {'maruti suzuki india ltd46':'maruti suzuki','renault india pvt ltd46':'renault'}.get(value,value)
  fitments=[];products=[]
  for data in payloads:
   brand=data['brand']

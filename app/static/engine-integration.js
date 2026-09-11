@@ -4,6 +4,44 @@
   if (!form) return;
 
   const submit = form.querySelector('.enquiry-submit, button[type="submit"]');
+  const serviceGrid = document.querySelector('#serviceFields .form-grid');
+  const serviceDetails = document.getElementById('serviceDetails')?.closest('.field');
+  const centreField = document.createElement('div');
+  centreField.className = 'field full engine-centre-field';
+  centreField.innerHTML = `<label for="selectedCentre">Nearest service centre <span>*</span></label>
+    <select id="selectedCentre" name="selectedCentre" required disabled>
+      <option value="">Loading service centres…</option>
+    </select>
+    <div class="engine-centre-preview" id="engineCentrePreview" aria-live="polite">Choose the centre most convenient for your visit.</div>`;
+  serviceGrid?.insertBefore(centreField, serviceDetails || null);
+  const centreSelect = centreField.querySelector('select');
+  const centrePreview = centreField.querySelector('.engine-centre-preview');
+  let centres = [];
+
+  const syncCentreState = () => {
+    const isService = form.elements.enquiryType?.value === 'service';
+    centreSelect.disabled = !isService || !centres.length;
+    centreSelect.required = isService;
+    submit.disabled = isService && !centres.length;
+  };
+  form.querySelectorAll('input[name="enquiryType"]').forEach(input => input.addEventListener('change', syncCentreState));
+  centreSelect.addEventListener('change', () => {
+    const centre = centres.find(item => item.key === centreSelect.value);
+    centrePreview.textContent = centre ? centre.address : 'Choose the centre most convenient for your visit.';
+  });
+  fetch('/api/engine-d-carb/centres', {headers:{'Accept':'application/json'}})
+    .then(response => response.ok ? response.json() : Promise.reject(new Error('Unable to load service centres.')))
+    .then(data => {
+      centres = data.centres || [];
+      centreSelect.replaceChildren(new Option('Select your nearest centre', ''));
+      centres.forEach(centre => centreSelect.add(new Option(centre.name, centre.key)));
+      syncCentreState();
+    })
+    .catch(failure => {
+      centreSelect.replaceChildren(new Option('Service centres unavailable', ''));
+      centrePreview.textContent = `${failure.message} Please refresh the page or contact Engine D-Carb.`;
+      syncCentreState();
+    });
   const consent = document.createElement('label');
   consent.className = 'engine-consent';
   consent.innerHTML = `<input type="checkbox" name="consent" value="true" required>
@@ -16,7 +54,6 @@
       return;
     }
     event.preventDefault();
-    event.stopImmediatePropagation();
     event.stopImmediatePropagation();
     const error = document.getElementById('enquiryError');
     if (!form.reportValidity()) {
@@ -50,7 +87,42 @@
         const cost = result.indicative_cost
           ? ` The current tentative estimate is ${new Intl.NumberFormat('en-IN', {style: 'currency', currency: 'INR', maximumFractionDigits: 0}).format(result.indicative_cost)}; the service team will confirm the final price.`
           : '';
-        greeting.textContent = `Your vehicle details are ready for the Engine D-Carb service team.${cost} Select Continue to request confirmation and the nearest service-centre details.`;
+        greeting.textContent = `Your vehicle details are ready for ${result.centre.name}.${cost} The two WhatsApp messages are prepared and will be sent automatically after the WhatsApp connection is configured.`;
+        const actions = document.querySelector('#quoteResult .quote-actions');
+        const whatsapp = document.getElementById('quoteWhatsApp');
+        whatsapp.removeAttribute('href');
+        whatsapp.removeAttribute('target');
+        whatsapp.setAttribute('aria-disabled', 'true');
+        whatsapp.textContent = 'WhatsApp setup pending';
+        let messagePanel = document.getElementById('engineMessagePreview');
+        if (!messagePanel) {
+          messagePanel = document.createElement('div');
+          messagePanel.id = 'engineMessagePreview';
+          messagePanel.className = 'engine-message-preview';
+          actions?.before(messagePanel);
+        }
+        messagePanel.replaceChildren();
+        const heading = document.createElement('strong');
+        heading.textContent = 'Prepared customer message';
+        const message = document.createElement('pre');
+        message.textContent = result.messages.customer;
+        const copy = document.createElement('button');
+        copy.type = 'button';
+        copy.className = 'quote-action';
+        copy.textContent = 'Copy customer message';
+        copy.addEventListener('click', async () => {
+          if (navigator.clipboard) await navigator.clipboard.writeText(result.messages.customer);
+          else {
+            const box = document.createElement('textarea');
+            box.value = result.messages.customer;
+            document.body.append(box);
+            box.select();
+            document.execCommand('copy');
+            box.remove();
+          }
+          copy.textContent = 'Customer message copied';
+        });
+        messagePanel.append(heading, message, copy);
       }
       form.hidden = true;
       document.getElementById('quoteResult')?.focus({preventScroll: true});
@@ -62,6 +134,7 @@
       submit.disabled = false;
       submit.removeAttribute('aria-busy');
       submit.textContent = originalLabel;
+      syncCentreState();
     }
   }, true);
 })();

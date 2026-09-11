@@ -27,8 +27,9 @@ def test_dynamic_form_schema_and_conditional_validation(tmp_path):
  assert all(key in schemas.json['new']['applications'] for key in
             ('three_wheeler','four_wheeler','commercial_vehicle','bus','truck','tractor','earth_mover'))
  vehicle_fields={field['name'] for field in schemas.json['new']['applications']['four_wheeler']['fields']}
- assert {'vehicle_make','vehicle_model','brand','city','pincode'} <= vehicle_fields
- assert all(field['type'] == 'select' for field in schemas.json['new']['applications']['four_wheeler']['fields'] if field['name'] in {'vehicle_make','vehicle_model','brand'})
+ assert {'vehicle_make','vehicle_model','city','pincode'} <= vehicle_fields
+ assert 'brand' not in vehicle_fields
+ assert all(field['type'] == 'search' for field in schemas.json['new']['applications']['four_wheeler']['fields'] if field['name'] in {'vehicle_make','vehicle_model'})
  tubular_fields={field['name']:field for field in schemas.json['restoration']['applications']['inverter_tubular']['fields']}
  assert tubular_fields['old_voltage']=={'name':'old_voltage','type':'hidden','value':'12'}
  assert 'old_capacity_ah' not in tubular_fields
@@ -40,8 +41,10 @@ def test_dynamic_form_schema_and_conditional_validation(tmp_path):
  assert validate_form(form|{'exchange_old_battery':'yes'})==['old_capacity_ah','old_quantity']
  script=c.get('/static/site-updates.js').data
  assert b'/api/form-schemas' in script and b'data-dynamic-fields' in script and b'/api/fitment-options' in script
+ assert b"document.createElement('datalist')" in script and b'Choose an option from the verified list.' in script
  assert b"predictionPanel.replaceChildren()" in script and b"predictionPanel.style.display = 'none'" in script
  page=c.get('/').data
+ assert b'Made by MANOZ TECH' in page and b'Market-ready concept prototype' not in page
  assert b'note.textContent = j.message' not in page and b'box.append(sources)' not in page
  quotation_script=c.get('/static/quotation.js').data
  assert b'data-quote-download' not in quotation_script
@@ -64,6 +67,7 @@ def test_sql_prediction_and_public_price_privacy(tmp_path,monkeypatch):
  assert all(key not in response.data.decode().lower() for key in ('mrp','tentative_price','selling_price'))
  options=c.get('/api/fitment-options?field=models&application=two_wheeler&make=Honda').json['options']
  assert 'Activa 110 Dec 2024' in options
+ assert services.norm('maruti suzuki india ltd46') == 'maruti suzuki'
 
 def test_catalog_publish_upserts_without_deleting_other_records(tmp_path, monkeypatch):
  from app import services

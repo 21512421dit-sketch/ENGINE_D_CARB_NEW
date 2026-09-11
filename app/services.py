@@ -7,7 +7,9 @@ from .models import Delivery
 BASE=Path(__file__).resolve().parent
 CATALOGS=BASE/'data/brands'
 SCHEMAS=BASE/'data/form_schemas.json'
-def norm(v): return re.sub(r'[^a-z0-9]+',' ',str(v or '').lower()).strip()
+def norm(v):
+ value=re.sub(r'[^a-z0-9]+',' ',str(v or '').lower()).strip()
+ return {'maruti suzuki india ltd46':'maruti suzuki','renault india pvt ltd46':'renault'}.get(value,value)
 def num(v):
  try:return float(str(v).replace(',',''))
  except:return None

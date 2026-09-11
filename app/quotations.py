@@ -16,7 +16,7 @@ from urllib.parse import urlsplit
 
 import fitz
 from flask import Blueprint, abort, current_app, jsonify, request, url_for
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from . import db
 from .models import Delivery, Lead, Recipient
@@ -288,6 +288,7 @@ def create_quotation():
     else:
         form.pop('expert_battery_brand', None)
         form.pop('expert_battery_model', None)
+        form.pop('brand', None)
     form['application'] = form.get('application') or form.get('battery_type', '')
     missing = validate_form(form) if form.get('application_key') else []
     if missing:
@@ -351,6 +352,22 @@ def download(lead_id, token):
         abort(404)
     return current_app.response_class(render_pdf(lead, quote), mimetype='application/pdf', headers={
         'Content-Disposition': f'attachment; filename="BatteryWala-{quote["number"]}.pdf"',
+        'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer',
+        'X-Content-Type-Options': 'nosniff'})
+
+
+@bp.get('/admin/quotations/<int:lead_id>/pdf')
+@login_required
+def admin_pdf(lead_id):
+    if not current_user.is_admin:
+        abort(403)
+    lead = db.session.get(Lead, lead_id)
+    quote = json.loads(lead.result_json or '{}').get('quotation') if lead else None
+    if not quote:
+        abort(404)
+    disposition = 'attachment' if request.args.get('download') == '1' else 'inline'
+    return current_app.response_class(render_pdf(lead, quote), mimetype='application/pdf', headers={
+        'Content-Disposition': f'{disposition}; filename="BatteryWala-{quote["number"]}.pdf"',
         'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer',
         'X-Content-Type-Options': 'nosniff'})
 

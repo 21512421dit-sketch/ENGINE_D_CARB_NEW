@@ -5,7 +5,7 @@ from flask_login import login_user,logout_user,login_required,current_user
 from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 from . import db
-from .models import User,Recipient,Lead,Upload,Delivery,BatteryFitment,BatteryProduct
+from .models import User,Recipient,Lead,Upload,Delivery,BatteryFitment,BatteryProduct,EngineCentre
 from .services import ALLOWED_BRANDS,predict,public_result,extract_document,publish,load_data,load_form_schemas,validate_form,notify,norm,fitment_application
 bp=Blueprint('main',__name__)
 def csrf():
@@ -31,6 +31,7 @@ def index():
   return engine_site_response()
  path=Path(__file__).resolve().parent.parent/'docs'/'optimized_main_prototype.html'
  html=path.read_text(encoding='utf-8')
+ html=html.replace('© 2026 BatteryWala. Market-ready concept prototype.','© 2026 BatteryWala. Made by MANOZ TECH.')
  head='''<link rel="icon" href="/static/images/batterywala-logo-original.png"><link rel="stylesheet" href="/static/site-updates.css"><script>try{sessionStorage.setItem('bwRestoreSeen','1')}catch(e){}</script></head>'''
  body='''<script src="/static/site-updates.js"></script><script src="/static/quotation.js"></script></body>'''
  return Response(html.replace('</head>',head).replace('</body>',body),mimetype='text/html')
@@ -44,7 +45,7 @@ def api_predict():
   form['brand']=form.get('expert_battery_brand') or form.get('brand','')
   form['model_no']=form.get('expert_battery_model') or form.get('model_no','')
  else:
-  form.pop('expert_battery_brand',None);form.pop('expert_battery_model',None)
+  form.pop('expert_battery_brand',None);form.pop('expert_battery_model',None);form.pop('brand',None)
  form['application']=form.get('application') or form.get('battery_type','')
  form['vehicle_model']=form.get('vehicle_model') or form.get('car_model') or form.get('model_no') or form.get('vehicle_brand') or form.get('battery_type','')
  missing=validate_form(form) if form.get('application_key') else [x for x in ('name','phone','application') if not str(form.get(x,'')).strip()]
@@ -63,7 +64,7 @@ def display_options(rows,value_field,key_field):
  for row in rows:
   value=getattr(row,value_field);key=getattr(row,key_field)
   current=grouped.get(key)
-  if current is None or (current.isupper() and not value.isupper()):grouped[key]=value
+  if current is None or (current.isupper() and not value.isupper()) or len(value)<len(current):grouped[key]=value
  return sorted(grouped.values(),key=str.casefold)
 @bp.get('/api/fitment-options')
 def fitment_options():
@@ -111,8 +112,9 @@ def admin():
  from .portal import SITES,filtered_submissions,purge_expired_submissions,submission_dict
  purge_expired_submissions();site,query=filtered_submissions(request.args)
  return render_template('admin.html',site=site,sites=SITES,submissions=[submission_dict(item) for item in query.limit(100).all()],
-  submission_total=query.count(),site_totals={key:Submission.query.filter_by(site=key,consented=True).count() for key in SITES},
+ submission_total=query.count(),site_totals={key:Submission.query.filter_by(site=key,consented=True).count() for key in SITES},
   employees=User.query.filter_by(is_admin=False).order_by(User.email).all(),recipients=Recipient.query.order_by(Recipient.id.desc()).all(),
+  engine_centres=EngineCentre.query.order_by(EngineCentre.sort_order,EngineCentre.id).all(),
   uploads=Upload.query.order_by(Upload.id.desc()).limit(20),records=len(load_data().get('records',[])))
 @bp.post('/admin/upload')
 @admin_required

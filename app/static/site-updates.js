@@ -276,38 +276,41 @@
       };
       const loadFitmentOptions = async (control, field, values, emptyLabel) => {
         if (!control) return [];
-        control.replaceChildren(option('', 'Loading…')); control.disabled = true;
+        const list = control.list;
+        if (list) { list.replaceChildren(); control.value = ''; control.placeholder = 'Loading…'; }
+        else control.replaceChildren(option('', 'Loading…'));
+        control.disabled = true;
         const params = new URLSearchParams({field, application: applicationSelect.value, ...values});
         const response = await fetch(`/api/fitment-options?${params}`, {headers: {'ngrok-skip-browser-warning': '1'}});
         const payload = await response.json();
         if (!response.ok) throw new Error(payload.error || 'Unable to load battery options');
-        control.replaceChildren(option('', emptyLabel));
-        payload.options.forEach(value => control.append(option(value, value)));
+        if (list) {
+          list.replaceChildren(); control.placeholder = emptyLabel;
+          payload.options.forEach(value => list.append(option(value, value)));
+          control._fitmentOptions = payload.options;
+          control.setCustomValidity('');
+        } else {
+          control.replaceChildren(option('', emptyLabel));
+          payload.options.forEach(value => control.append(option(value, value)));
+        }
         control.disabled = false;
         return payload.options;
       };
       const installFitmentFilters = () => {
         const make = requestForm.elements.vehicle_make;
         const model = requestForm.elements.vehicle_model;
-        const fuel = requestForm.elements.fuel_type;
-        const brand = requestForm.elements.brand;
         if (!make || !model) return;
-        const reset = (control, label) => { if (control) { control.replaceChildren(option('', label)); control.disabled = true; } };
+        const reset = (control, label) => { if (control) { if (control.list) { control.value = ''; control.placeholder = label; control.list.replaceChildren(); } else control.replaceChildren(option('', label)); control.disabled = true; } };
         reset(model, 'Select a make first');
-        if (brand) reset(brand, 'Any of the five brands');
-        loadFitmentOptions(make, 'makes', {}, 'Select a make').catch(error => { note.textContent = error.message; });
-        const refreshBrands = () => {
-          if (!brand || !make.value || !model.value) return;
-          loadFitmentOptions(brand, 'brands', {make: make.value, model: model.value, fuel: fuel?.value || ''}, 'Any of the five brands')
+        loadFitmentOptions(make, 'makes', {}, 'Type to search makes').catch(error => { note.textContent = error.message; });
+        const refreshModels = () => {
+          reset(model, 'Select a make first');
+          const exact = (make._fitmentOptions || []).some(value => value.toLocaleLowerCase() === make.value.trim().toLocaleLowerCase());
+          if (exact) loadFitmentOptions(model, 'models', {make: make.value}, 'Type to search models')
             .catch(error => { note.textContent = error.message; });
         };
-        make.addEventListener('change', () => {
-          reset(model, 'Select a make first'); if (brand) reset(brand, 'Any of the five brands');
-          if (make.value) loadFitmentOptions(model, 'models', {make: make.value}, 'Select a model')
-            .catch(error => { note.textContent = error.message; });
-        });
-        model.addEventListener('change', refreshBrands);
-        fuel?.addEventListener('change', refreshBrands);
+        make.addEventListener('input', refreshModels);
+        make.addEventListener('change', refreshModels);
       };
       const renderFields = schema => {
         fieldsHost.replaceChildren();
@@ -322,6 +325,14 @@
           if (field.type === 'select') {
             control = document.createElement('select'); control.append(option('', 'Select'));
             (field.options || []).forEach(item => control.append(option(typeof item === 'string' ? item : item.value, typeof item === 'string' ? item : item.label)));
+          } else if (field.type === 'search') {
+            control = document.createElement('input'); control.type = 'search'; control.autocomplete = 'off';
+            const list = document.createElement('datalist'); list.id = `bw-${field.name}-options`; control.setAttribute('list', list.id);
+            control.addEventListener('input', () => {
+              const exact = (control._fitmentOptions || []).some(value => value.toLocaleLowerCase() === control.value.trim().toLocaleLowerCase());
+              control.setCustomValidity(!control.value || exact ? '' : 'Choose an option from the verified list.');
+            });
+            wrapper.append(label, control, list);
           } else if (field.type === 'textarea') control = document.createElement('textarea');
           else { control = document.createElement('input'); control.type = field.type || 'text'; }
           control.name = field.name; control.id = `bw-${field.name}`; label.htmlFor = control.id;
@@ -330,7 +341,8 @@
           if (field.max !== undefined) control.max = field.max;
           if (field.required) control.dataset.schemaRequired = 'true';
           if (field.show_when) wrapper.dataset.showWhen = JSON.stringify(field.show_when);
-          wrapper.append(label, control); fieldsHost.append(wrapper);
+          if (!control.parentElement) wrapper.append(label, control);
+          fieldsHost.append(wrapper);
         });
         const updateConditions = () => fieldsHost.querySelectorAll('[data-show-when]').forEach(wrapper => {
           const conditions = JSON.parse(wrapper.dataset.showWhen);
