@@ -55,6 +55,41 @@ def test_consent_engine_pricing_and_retention(tmp_path):
         assert 729 <= (item.expires_at.replace(tzinfo=timezone.utc) - item.created_at.replace(tzinfo=timezone.utc)).days <= 731
 
 
+def test_engine_email_quote_sends_customer_and_internal_copy(tmp_path, monkeypatch):
+    sent = []
+
+    class SMTP:
+        def __init__(self, *args, **kwargs): pass
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def starttls(self): pass
+        def login(self, *args): pass
+        def send_message(self, message): sent.append(message)
+
+    monkeypatch.setenv('SMTP_HOST', 'smtp.example.com')
+    monkeypatch.setenv('SMTP_USERNAME', 'engine@example.com')
+    monkeypatch.setenv('SMTP_PASSWORD', 'app-password')
+    monkeypatch.setenv('SMTP_FROM', 'engine@example.com')
+    monkeypatch.setenv('ENGINE_DCARB_EMAIL', 'office@example.com')
+    monkeypatch.setattr('app.portal.smtplib.SMTP', SMTP)
+    app = make_app(tmp_path)
+    client = app.test_client()
+
+    missing = client.post('/api/engine-d-carb/quotations', json=engine_service(emailQuote=True))
+    assert missing.status_code == 400
+    response = client.post('/api/engine-d-carb/quotations', json=engine_service(
+        serviceEmail='customer@example.com', emailQuote=True
+    ))
+    assert response.status_code == 200
+    assert response.json['email_delivery'] == [
+        {'recipient': 'customer', 'status': 'sent'},
+        {'recipient': 'engine_dcarb', 'status': 'sent'},
+    ]
+    assert [message['To'] for message in sent] == ['customer@example.com', 'office@example.com']
+    assert sent[1]['Reply-To'] == 'customer@example.com'
+    assert 'Indicative service cost' in sent[0].get_content()
+
+
 def test_engine_centres_are_public_and_admin_manages_multiple_numbers(tmp_path):
     app = make_app(tmp_path)
     client = app.test_client()

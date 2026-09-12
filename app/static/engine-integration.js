@@ -4,6 +4,8 @@
   if (!form) return;
 
   const submit = form.querySelector('.enquiry-submit, button[type="submit"]');
+  const emailQuote = form.elements.emailQuote;
+  const serviceEmail = form.elements.serviceEmail;
   const serviceGrid = document.querySelector('#serviceFields .form-grid');
   const serviceDetails = document.getElementById('serviceDetails')?.closest('.field');
   const centreField = document.createElement('div');
@@ -23,8 +25,10 @@
     centreSelect.disabled = !isService || !centres.length;
     centreSelect.required = isService;
     submit.disabled = isService && !centres.length;
+    if (serviceEmail) serviceEmail.required = isService && emailQuote?.checked;
   };
   form.querySelectorAll('input[name="enquiryType"]').forEach(input => input.addEventListener('change', syncCentreState));
+  emailQuote?.addEventListener('change', syncCentreState);
   centreSelect.addEventListener('change', () => {
     const centre = centres.find(item => item.key === centreSelect.value);
     centrePreview.textContent = centre ? centre.address : 'Choose the centre most convenient for your visit.';
@@ -123,6 +127,15 @@
           copy.textContent = 'Customer message copied';
         });
         messagePanel.append(heading, message, copy);
+      }
+      if (payload.emailQuote === 'true') {
+        const delivery = result.email_delivery || [];
+        const delivered = delivery.length === 2 && delivery.every(item => item.status === 'sent');
+        greeting.textContent += delivered
+          ? ' The quotation was emailed to you and a copy was sent to Engine D-Carb.'
+          : ' Your enquiry was saved, but email delivery could not be completed. Please contact Engine D-Carb if you do not receive it.';
+        const manualEmail = document.getElementById('quoteEmail');
+        if (manualEmail) manualEmail.hidden = true;
       }
       form.hidden = true;
       document.getElementById('quoteResult')?.focus({preventScroll: true});

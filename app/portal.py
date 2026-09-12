@@ -3,7 +3,10 @@ import io
 import json
 import os
 import re
+import smtplib
 from datetime import datetime, timezone
+from email.message import EmailMessage
+from email.utils import formataddr
 from pathlib import Path
 
 from flask import Blueprint, Response, current_app, jsonify, redirect, render_template, request, send_file, url_for
@@ -47,13 +50,14 @@ FIELD_LABELS = {
     'expertMachine': 'Recommended machine', 'fuelType': 'Fuel type', 'kilometres': 'Kilometres driven',
     'machineCity': 'City', 'machineEmail': 'Email address', 'machinePhone': 'Phone number',
     'machinePin': 'PIN code', 'passingYear': 'Registration year', 'representativeName': 'Representative name',
-    'serviceCity': 'City', 'serviceDetails': 'Service details', 'servicePhone': 'Phone number',
+    'serviceCity': 'City', 'serviceDetails': 'Service details', 'serviceEmail': 'Email address',
+    'servicePhone': 'Phone number',
     'servicePin': 'PIN code', 'vehicleBrand': 'Vehicle brand', 'vehicleModel': 'Vehicle model',
     'vehicleType': 'Vehicle type', 'indicative_cost': 'Indicative cost', 'machine': 'Recommended machine',
     'selectedCentre': 'Preferred service centre', 'message': 'Message', 'note': 'Note',
     'number': 'Quotation number', 'status': 'Status',
 }
-HIDDEN_DISPLAY_FIELDS = {'consent', 'token'}
+HIDDEN_DISPLAY_FIELDS = {'consent', 'emailQuote', 'token'}
 
 
 def field_label(key):
@@ -85,7 +89,7 @@ def display_fields(data, prefix=''):
         if key in HIDDEN_DISPLAY_FIELDS:
             continue
         aliases = {'name': ('customerName', 'representativeName'), 'phone': ('servicePhone', 'machinePhone'),
-                   'email': ('machineEmail',)}
+                   'email': ('serviceEmail', 'machineEmail')}
         if key in aliases and any(alias in data for alias in aliases[key]):
             continue
         label = f'{prefix} — {field_label(key)}' if prefix else field_label(key)
@@ -152,6 +156,78 @@ def service_messages(form, result, centre):
     return {'customer': customer, 'centre': owner, 'centre_numbers': numbers, 'sender_number': '7727005151'}
 
 
+def send_engine_emails(form, result, customer_email):
+    """Send the customer confirmation and an internal, replyable enquiry copy."""
+    sender = (os.getenv('SMTP_FROM') or os.getenv('SMTP_USERNAME') or '').strip()
+    engine_email = (os.getenv('ENGINE_DCARB_EMAIL') or sender).strip()
+    if not os.getenv('SMTP_HOST') or not sender or not engine_email:
+        return [
+            {'recipient': 'customer', 'status': 'not_configured'},
+            {'recipient': 'engine_dcarb', 'status': 'not_configured'},
+        ]
+
+    kind = form['enquiryType']
+    customer_name = form.get('customerName') or form.get('representativeName') or 'Customer'
+    if kind == 'service':
+        centre = result['centre']
+        customer_subject = 'Your Engine D-Carb service quotation'
+        customer_body = (
+            f"Hello {customer_name},\n\n"
+            f"Thank you for your Engine D-Carb service enquiry.\n\n"
+            f"Indicative service cost: ₹{result['indicative_cost']:,}\n"
+            f"Selected centre: {centre['name']}\n{centre['address']}\n\n"
+            f"Vehicle: {form['vehicleBrand']} {form['vehicleModel']} ({form['passingYear']})\n"
+            f"Fuel: {form['fuelType']}\nEngine capacity: {form['engineCc']} CC\n"
+            f"Kilometres: {int(form['kilometres']):,} km\n\n"
+            "This is an indicative quotation. The service team will confirm the final price and appointment."
+        )
+        internal_subject = f"New Engine D-Carb service enquiry — {customer_name}"
+    else:
+        customer_subject = 'Your Engine D-Carb machine enquiry'
+        customer_body = (
+            f"Hello {customer_name},\n\n"
+            "Thank you for your Engine D-Carb machine enquiry. Our team will review your business "
+            "requirements and contact you with the suitable configuration and quotation.\n\n"
+            "Regards,\nEngine D-Carb"
+        )
+        internal_subject = f"New Engine D-Carb machine enquiry — {customer_name}"
+
+    internal_body = (
+        "A customer submitted an Engine D-Carb enquiry and requested email follow-up.\n"
+        "Reply to this email to contact the customer directly.\n\n"
+        + fields_as_text(display_fields(form))
+        + "\n\nResult:\n"
+        + fields_as_text(display_fields(result))
+    )
+    messages = []
+    for recipient, target, subject, body, reply_to in (
+        ('customer', customer_email, customer_subject, customer_body, engine_email),
+        ('engine_dcarb', engine_email, internal_subject, internal_body, customer_email),
+    ):
+        message = EmailMessage()
+        message['Subject'] = subject
+        message['From'] = formataddr(('Engine D-Carb', sender))
+        message['To'] = target
+        message['Reply-To'] = reply_to
+        message.set_content(body)
+        messages.append((recipient, message))
+
+    deliveries = []
+    try:
+        with smtplib.SMTP(os.environ['SMTP_HOST'], int(os.getenv('SMTP_PORT', '587')), timeout=15) as smtp:
+            if os.getenv('SMTP_USE_TLS', 'true').lower() == 'true':
+                smtp.starttls()
+            if os.getenv('SMTP_USERNAME'):
+                smtp.login(os.environ['SMTP_USERNAME'], os.getenv('SMTP_PASSWORD'))
+            for recipient, message in messages:
+                smtp.send_message(message)
+                deliveries.append({'recipient': recipient, 'status': 'sent'})
+    except Exception:
+        sent = {item['recipient'] for item in deliveries}
+        deliveries.extend({'recipient': recipient, 'status': 'failed'} for recipient, _ in messages if recipient not in sent)
+    return deliveries
+
+
 def purge_expired_submissions():
     now = utcnow()
     expired = Submission.query.filter(Submission.expires_at <= now).all()
@@ -198,6 +274,9 @@ def admin_required(fn):
 def engine_site_response():
     source = Path(current_app.root_path).parent / 'docs' / 'engine_dcarb_latest.html'
     html = source.read_text(encoding='utf-8')
+    public_email = (os.getenv('ENGINE_DCARB_EMAIL') or os.getenv('SMTP_FROM') or
+                    os.getenv('SMTP_USERNAME') or 'engine.dcarb@gmail.com').strip()
+    html = html.replace('rahul.care4earth@outlook.com', public_email)
     html = html.replace('Your information stays in your browser until you choose to send it.',
                         'Your information is stored for 24 months only after you accept the consent notice and submit.')
     html = html.replace('Submitting prepares the summary on this device. Nothing is uploaded automatically.',
@@ -216,11 +295,11 @@ def engine_site_response():
         for question, answer in ENGINE_FAQS]}
     integration = (
         '<link rel="icon" href="/static/images/batterywala-logo-original.png">'
-        '<link rel="stylesheet" href="/static/engine-integration.css?v=20260909-1">'
+        '<link rel="stylesheet" href="/static/engine-integration.css?v=20260911-1">'
         '<meta name="application-name" content="Engine D-Carb">'
         f'<script type="application/ld+json">{json.dumps(faq_schema, ensure_ascii=False)}</script></head>'
     )
-    scripts = '<script src="/static/engine-integration.js?v=20260909-1"></script></body>'
+    scripts = '<script src="/static/engine-integration.js?v=20260911-1"></script></body>'
     return Response(html.replace('</head>', integration).replace('</body>', scripts), mimetype='text/html')
 
 
@@ -292,7 +371,7 @@ def engine_quotation():
         result = {'status': 'ready', 'indicative_cost': round(cc * factor * 1.1),
                   'machine': selected_machine or None, 'centre': centre_dict(centre)}
         result['messages'] = service_messages(form, result, centre)
-        name, phone = form['customerName'], form['servicePhone']
+        name, phone, email = form['customerName'], form['servicePhone'], form.get('serviceEmail', '')
     else:
         required = ('companyAddress', 'machineEmail', 'representativeName', 'machinePhone', 'businessDetails', 'machineCity', 'machinePin')
         if any(not form.get(key) for key in required):
@@ -302,10 +381,17 @@ def engine_quotation():
         if not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+', form['machineEmail']):
             return jsonify(error='Enter a valid email address.'), 400
         result = {'status': 'received', 'machine': selected_machine or None}
-        name, phone = form['representativeName'], form['machinePhone']
-    normalized = dict(form, name=name, phone=phone, email=form.get('machineEmail', ''))
+        name, phone, email = form['representativeName'], form['machinePhone'], form['machineEmail']
+    email_requested = form.get('emailQuote') is True or form.get('emailQuote') == 'true'
+    if email and not re.fullmatch(r'[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+', email):
+        return jsonify(error='Enter a valid email address.'), 400
+    if email_requested and not email:
+        return jsonify(error='Enter a valid email address to receive the quotation.'), 400
+    normalized = dict(form, name=name, phone=phone, email=email)
     record_submission('engine_dcarb', kind, normalized, result, consented=True)
     db.session.commit()
+    if email_requested:
+        result['email_delivery'] = send_engine_emails(form, result, email)
     return jsonify(result)
 
 
